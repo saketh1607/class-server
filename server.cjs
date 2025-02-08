@@ -4,39 +4,46 @@ const http = require("http");
 const { Server } = require("socket.io");
 
 const app = express();
-const PORT = process.env.PORT || 3000; // Render requires process.env.PORT
-
+const PORT = process.env.PORT || 3000; // Ensure compatibility with Render
 const server = http.createServer(app);
+
 const io = new Server(server, {
-  cors: { origin: "*" }, // Allow all origins for now
+    cors: { origin: '*' } // Allow all origins for testing
 });
 
-app.use(cors());
+const corsOptions = {
+    origin: ['http://127.0.0.1:5500', 'http://localhost:5500'], 
+    methods: ['GET', 'POST'],
+    credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 let questions = [];
 
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-  socket.emit("loadQuestions", questions);
+    console.log("✅ User connected:", socket.id);
 
-  socket.on("askQuestion", (q) => {
-    const question = { id: Date.now(), text: q, upvotes: 0 };
-    questions.push(question);
-    io.emit("newQuestion", question);
-  });
+    socket.emit("loadQuestions", questions);
 
-  socket.on("upvote", (id) => {
-    const q = questions.find((q) => q.id === id);
-    if (q) {
-      q.upvotes++;
-      io.emit("updateQuestions", questions);
-    }
-  });
+    socket.on("askQuestion", (q) => {
+        const question = { id: Date.now(), text: q, upvotes: 0 };
+        questions.push(question);
+        io.emit("newQuestion", question);
+    });
 
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
+    socket.on("upvote", (id) => {
+        const q = questions.find((q) => q.id === id);
+        if (q) {
+            q.upvotes++;
+            io.emit("updateQuestions", questions);
+        }
+    });
+
+    socket.on("disconnect", () => {
+        console.log("❌ User disconnected:", socket.id);
+    });
 });
 
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
