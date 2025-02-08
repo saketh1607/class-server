@@ -1,17 +1,12 @@
-import express from "express";
-import cors from "cors";
-import { Server } from "socket.io";
+const express = require("express");
+const cors = require("cors");
 const http = require("http");
+const { Server } = require("socket.io");
 
-app.use(cors({
-    origin: ['http://127.0.0.1:5500', 'http://localhost:5500'], 
-    methods: ['GET', 'POST'],
-    credentials: true
-}));
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "*" },
+  cors: { origin: "*" }, // Allow all origins for now
 });
 
 app.use(cors());
